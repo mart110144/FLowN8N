@@ -1,0 +1,341 @@
+{
+  "name": "My workflow 7",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "b26d8946-e1f7-4675-ab63-8c269dbf36ef",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.gold-api.com/price/XAU",
+        "options": {}
+      },
+      "id": "711ea5cf-60e2-4049-a47f-d34169a758a0",
+      "name": "Gold Price",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        512,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.gold-api.com/price/BTC",
+        "options": {}
+      },
+      "id": "b844279d-8aff-465e-b522-2535d4812e35",
+      "name": "BTC Price",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        736,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
+        "options": {}
+      },
+      "id": "ab01a671-f15e-4cee-b9d1-e111ab60358b",
+      "name": "USD Rate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        960,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "btc_usd_price",
+              "type": "numberValue",
+              "numberValue": "={{ $('BTC Price').item.json.price }}"
+            },
+            {
+              "name": "gold_usd_price",
+              "type": "numberValue",
+              "numberValue": "={{ $('Gold Price').item.json.price }}"
+            },
+            {
+              "name": "usd_to_thb",
+              "type": "numberValue",
+              "numberValue": "={{ $json.usd.thb }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3b40e97-33e9-4920-961c-3e68cc73b6c1",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        1168,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// วนลูปข้อมูลทุก item ที่เข้ามาจาก node ก่อนหน้า\nfor (const item of $input.all()) {\n\n  // คำนวณราคา Bitcoin เป็นเงินบาท\n  // โดยเอาราคา BTC (USD) คูณกับอัตราแลกเปลี่ยน USD → THB\n  item.json.btc_thb_price = item.json.btc_usd_price * item.json.usd_to_thb;\n\n  // คำนวณราคาทองคำเป็นเงินบาท\n  // โดยเอาราคาทอง (USD) คูณกับอัตราแลกเปลี่ยน USD → THB\n  item.json.gold_thb_price = item.json.gold_usd_price * item.json.usd_to_thb;\n}\n\n// ส่งข้อมูลทั้งหมด (ที่ถูกเพิ่ม field ใหม่แล้ว) ออกไปยัง node ถัดไป\nreturn $input.all();"
+      },
+      "id": "3480005e-1706-43af-bb06-6cae9f6e7464",
+      "name": "Code Formatting",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "phongsakorn606@gmail.com",
+        "subject": "update ราคาทองคำ ค่าเงิน ดอลล่า และราคา BTC",
+        "emailType": "text",
+        "message": "=อัตราแลกเปลี่ยน (Exchange) ณ วันที่ {{ new Date($('Schedule Trigger').item.json.timestamp).toLocaleString('th-TH') }}\n1 USD = {{ Number($json.usd_to_thb.toFixed(2)).toLocaleString() }} THB\n\nราคา Bitcoin (BTC)\n{{ Number($json.btc_usd_price.toFixed(2)).toLocaleString() }} USD\n{{ Number($json.btc_thb_price.toFixed(2)).toLocaleString() }} THB\n\nราคาทองคำ (Gold) ราคาทองคำต่อ 1 troy ounce (ออนซ์สากล)\n{{ Number($json.gold_usd_price.toFixed(2)).toLocaleString() }} USD\n{{ Number($json.gold_thb_price.toFixed(2)).toLocaleString() }} THB",
+        "options": {}
+      },
+      "id": "c63c28ad-2944-445a-88d5-cdf3f42e1a05",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1616,
+        -160
+      ],
+      "webhookId": "156e9dd1-4baa-4563-ba3d-6e73d2e2b965",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VqYRjScO0DcH9ljs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1NukVYfZ_e00QtThNI49KGv7WKzBWtDkoHCukuCM9sF0",
+          "mode": "list",
+          "cachedResultName": "ข้อมูล BTC GOLD USD",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NukVYfZ_e00QtThNI49KGv7WKzBWtDkoHCukuCM9sF0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "BTCprice",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NukVYfZ_e00QtThNI49KGv7WKzBWtDkoHCukuCM9sF0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $('Code Formatting').item.json.date }}",
+            "BTC (USD)": "={{ $('Code Formatting').item.json.btc_usd_price }}",
+            "Gold (USD)": "={{ $('Code Formatting').item.json.gold_usd_price }}",
+            "Exchange Rate (USD/THB)": "={{ $('Code Formatting').item.json.usd_to_thb }}",
+            "BTC (THB)": "={{ $('Code Formatting').item.json.btc_thb_price }}",
+            "Gold (THB)": "={{ $('Code Formatting').item.json.gold_thb_price }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "BTC (USD)",
+              "displayName": "BTC (USD)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Gold (USD)",
+              "displayName": "Gold (USD)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Exchange Rate (USD/THB)",
+              "displayName": "Exchange Rate (USD/THB)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "BTC (THB)",
+              "displayName": "BTC (THB)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Gold (THB)",
+              "displayName": "Gold (THB)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ff4a48fb-42d1-4cc7-9c58-131845aaefa0",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        1840,
+        -160
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "djkFg0jUgAp9Fu63",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gold Price",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gold Price": {
+      "main": [
+        [
+          {
+            "node": "BTC Price",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BTC Price": {
+      "main": [
+        [
+          {
+            "node": "USD Rate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "USD Rate": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code Formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Formatting": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Bangkok",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "c4211068-1edf-43e3-aa3c-d8e9baaacd0f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a8757e7a45ca9e06e98bea8dbb637994a1c61fec9bddfc4021be4ac43ef6a0f7"
+  },
+  "id": "KoBczAV5b0O5tzCh",
+  "tags": []
+}

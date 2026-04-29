@@ -1,0 +1,157 @@
+{
+  "name": "API-googlesheets-vue-67713056",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "data",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        -176
+      ],
+      "id": "dc0c58b3-e175-4dd4-85a8-c4fc9b242ec8",
+      "name": "Webhook",
+      "webhookId": "396db3c4-c388-4442-95cb-cc49894aff9a"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1lNc6dqbcuC7vf9lbxkvtMoRlCLaPzcB8oIx9RrL3HQM",
+          "mode": "list",
+          "cachedResultName": "ลงทะเบียน (การตอบกลับ)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lNc6dqbcuC7vf9lbxkvtMoRlCLaPzcB8oIx9RrL3HQM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1641742923,
+          "mode": "list",
+          "cachedResultName": "register",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lNc6dqbcuC7vf9lbxkvtMoRlCLaPzcB8oIx9RrL3HQM/edit#gid=1641742923"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -192,
+        -176
+      ],
+      "id": "6b3c75f2-acbd-4f3c-922d-a3a31243ac5e",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ibwoRciOpHgX0K3p",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e95159d-430b-42c8-bc16-353c2bfd665e",
+              "name": "tdate",
+              "value": "={{ $json['ประทับเวลา'] }}",
+              "type": "string"
+            },
+            {
+              "id": "c7c4e7c7-8502-4531-a91e-05f02c5ba77f",
+              "name": "id",
+              "value": "={{ $json['รหัสนักศึกษา'] }}",
+              "type": "number"
+            },
+            {
+              "id": "b5590486-d784-430c-bace-edd5b89ed6d0",
+              "name": "fullname",
+              "value": "={{ $json['ชื่อ-นามสกุล'] }}",
+              "type": "string"
+            },
+            {
+              "id": "bca82926-b647-4ebb-a843-dc08f49f8e79",
+              "name": "department",
+              "value": "={{ $json['คณะ'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        -176
+      ],
+      "id": "66293ee0-fd69-4ca2-8a56-f562135aae0a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        224,
+        -176
+      ],
+      "id": "e467dc01-d6a6-47f4-839c-1a52f5d3bee8",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "37dd4c62-26b9-4df8-82c6-3e1f6a782a79",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "319e4ffe3a90f9aa8e791473505f2cc8294cda9a3490d6127a87a50417c136c1"
+  },
+  "id": "ukQoffplIPIL05lM",
+  "tags": []
+}
